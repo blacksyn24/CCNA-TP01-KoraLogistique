@@ -1,0 +1,58 @@
+! R1-KORA — Cisco c7200 (GNS3) — TP01 Kora Logistique
+enable
+configure terminal
+hostname R1-KORA
+no ip domain-lookup
+ip domain-name koralog.bj
+banner motd # ACCES RESERVE AU PERSONNEL AUTORISE DE KORA LOGISTIQUE #
+security passwords min-length 10
+enable secret Kora@Enable26
+service password-encryption
+username admin privilege 15 secret Kora@Admin26
+login block-for 120 attempts 3 within 60
+line console 0
+ password Kora@Cons26
+ login
+ exec-timeout 5 0
+ logging synchronous
+exit
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+line vty 0 4
+ login local
+ transport input ssh
+ exec-timeout 5 0
+ logging synchronous
+exit
+ipv6 unicast-routing
+interface GigabitEthernet1/0
+ description LAN OPERATIONS - vers S1-OPS Gi0/0
+ ip address 192.168.50.1 255.255.255.128
+ ipv6 address 2001:db8:acad:10::1/64
+ ipv6 address fe80::1 link-local
+ no shutdown
+exit
+interface GigabitEthernet2/0
+ description LAN ADMINISTRATION - vers S2-ADM Gi0/0
+ ip address 192.168.50.129 255.255.255.192
+ ipv6 address 2001:db8:acad:20::1/64
+ ipv6 address fe80::1 link-local
+ no shutdown
+exit
+interface GigabitEthernet3/0
+ description LAN SERVEURS - vers S3-SRV Gi0/0
+ ip address 192.168.50.193 255.255.255.240
+ ipv6 address 2001:db8:acad:30::1/64
+ ipv6 address fe80::1 link-local
+ no shutdown
+exit
+interface FastEthernet0/0
+ description PORT NON UTILISE
+ shutdown
+exit
+interface GigabitEthernet4/0
+ description PORT NON UTILISE
+ shutdown
+exit
+end
+copy running-config startup-config

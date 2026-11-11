@@ -1,0 +1,69 @@
+! =====================================================================
+!  S1-OPS — Catalyst 2960-24TT — Configuration finale (CORRIGÉ)
+!  TP01 Kora Logistique — Commutateur du LAN OPERATIONS
+! =====================================================================
+enable
+configure terminal
+!
+! --- Identité ---------------------------------------------------------
+hostname S1-OPS
+no ip domain-lookup
+ip domain-name koralog.bj
+banner motd #
+***************************************************************
+*  ACCES RESERVE AU PERSONNEL AUTORISE DE KORA LOGISTIQUE SARL *
+*  Toute connexion non autorisee est interdite et sera         *
+*  poursuivie conformement a la loi.                           *
+***************************************************************
+#
+!
+! --- Sécurité des mots de passe ---------------------------------------
+enable secret Kora@Enable26
+service password-encryption
+username admin privilege 15 secret Kora@Admin26
+!
+line console 0
+ password Kora@Cons26
+ login
+ exec-timeout 5 0
+ logging synchronous
+exit
+!
+! --- Gestion à distance ------------------------------------------------
+interface vlan 1
+ description Gestion S1-OPS
+ ip address 192.168.50.2 255.255.255.128
+ no shutdown
+exit
+ip default-gateway 192.168.50.1
+!
+! --- SSH ---------------------------------------------------------------
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+!
+line vty 0 15
+ login local
+ transport input ssh
+ exec-timeout 5 0
+ logging synchronous
+exit
+!
+! --- Ports utilisés ----------------------------------------------------
+interface GigabitEthernet0/1
+ description Uplink vers R1-KORA
+exit
+interface FastEthernet0/1
+ description PC-OPS1
+exit
+interface FastEthernet0/2
+ description PC-OPS2
+exit
+!
+! --- Durcissement : ports inutilisés désactivés -----------------------
+interface range FastEthernet0/3 - 24 , GigabitEthernet0/2
+ description PORT NON UTILISE - DESACTIVE
+ shutdown
+exit
+!
+end
+copy running-config startup-config
